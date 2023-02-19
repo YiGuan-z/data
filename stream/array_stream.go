@@ -1,6 +1,8 @@
 package stream
 
-import "github.com/YiGuan-z/data/set"
+import (
+	"github.com/YiGuan-z/data/set"
+)
 
 type ArrayStream struct {
 	data []any

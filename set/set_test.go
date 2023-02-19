@@ -1,12 +1,13 @@
-package set
+package set_test
 
 import (
+	"github.com/YiGuan-z/data/set"
 	"testing"
 )
 
 func TestSet(t *testing.T) {
 	t.Run("testAdd", func(t *testing.T) {
-		set := NewSet(5)
+		set := set.NewSet(5)
 		set.Add(1)
 		set.Add(1)
 		set.Add(1)
@@ -19,7 +20,7 @@ func TestSet(t *testing.T) {
 		}
 	})
 	t.Run("testRemove", func(t *testing.T) {
-		set := NewSet(5)
+		set := set.NewSet(5)
 		set.Add(1)
 		t.Log(set.Size())
 		set.Remove(1)
@@ -29,7 +30,7 @@ func TestSet(t *testing.T) {
 		}
 	})
 	t.Run("testRange", func(t *testing.T) {
-		set := NewSet(5)
+		set := set.NewSet(5)
 		type User struct {
 			name string
 			id   int
@@ -47,7 +48,7 @@ func TestSet(t *testing.T) {
 		})
 	})
 	t.Run("testClone", func(t *testing.T) {
-		set := NewSet(5)
+		set := set.NewSet(5)
 		type User struct {
 			name string
 			id   int
@@ -62,7 +63,7 @@ func TestSet(t *testing.T) {
 		})
 	})
 	t.Run("testClear", func(t *testing.T) {
-		set := NewSet(5)
+		set := set.NewSet(5)
 		type User struct {
 			name string
 			id   int

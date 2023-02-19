@@ -38,3 +38,11 @@ func NewSetOfStream(s stream.Stream) (ret set.Set) {
 	})
 	return
 }
+
+func NewSetOfSlice(c []any) set.Set {
+	s := set.NewSet(len(c))
+	for _, val := range c {
+		s.Add(val)
+	}
+	return s
+}

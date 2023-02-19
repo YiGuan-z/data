@@ -20,14 +20,6 @@ func NewSet(size int) Set {
 	}
 }
 
-func NewSetOfSlice(c []any) Set {
-	s := NewSet(len(c))
-	for _, val := range c {
-		s.Add(val)
-	}
-	return s
-}
-
 // Add 添加一个元素
 func (s *AnySet) Add(t any) {
 	s.m.Lock()
@@ -177,23 +169,43 @@ func (s *AnySet) Contains(val any) bool {
 }
 
 func (s *AnySet) RetainAll(anies []any) {
-	//TODO implement me
-	panic("implement me")
+	s.m.Lock()
+	defer s.m.Unlock()
+	for _, val := range anies {
+		if value, ok := s.data[val]; !ok {
+			s.Remove(value)
+		}
+	}
 }
 
 func (s *AnySet) RemoveAll(anies []any) {
-	//TODO implement me
-	panic("implement me")
+	s.m.Lock()
+	defer s.m.Unlock()
+	for _, val := range anies {
+		if value, ok := s.data[val]; ok {
+			s.Remove(value)
+		}
+	}
 }
 
 func (s *AnySet) ContainsAll(anies []any) bool {
-	//TODO implement me
-	panic("implement me")
+	s.m.RLock()
+	defer s.m.RUnlock()
+	r := true
+	for _, val := range anies {
+		_, ok := s.data[val]
+		r = r && ok
+	}
+	return r
 }
 
 func (s *AnySet) AddAll(anies []any) bool {
-	//TODO implement me
-	panic("implement me")
+	s.m.Lock()
+	defer s.m.Unlock()
+	for _, val := range anies {
+		s.Add(val)
+	}
+	return true
 }
 
 func (s *AnySet) Size() int {
