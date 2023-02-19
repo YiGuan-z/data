@@ -30,3 +30,11 @@ func ToArrayStream(set set.Set) (stream.Stream, error) {
 func ToChanStream(set set.Set) (stream.Stream, error) {
 	return toStream(set, true, false)
 }
+
+func NewSetOfStream(s stream.Stream) (ret set.Set) {
+	ret = set.NewSet(s.Size())
+	s.Range(func(val any) {
+		ret.Add(val)
+	})
+	return
+}

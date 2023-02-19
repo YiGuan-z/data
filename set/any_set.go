@@ -2,7 +2,6 @@ package set
 
 import (
 	"sync"
-	"unsafe"
 )
 
 type AnySet struct {
@@ -11,14 +10,22 @@ type AnySet struct {
 	m     sync.RWMutex
 }
 
-type Entry struct {
-	p unsafe.Pointer
-}
+//type Entry struct {
+//	p unsafe.Pointer
+//}
 
 func NewSet(size int) Set {
 	return &AnySet{
 		data: make(map[any]struct{}, size),
 	}
+}
+
+func NewSetOfSlice(c []any) Set {
+	s := NewSet(len(c))
+	for _, val := range c {
+		s.Add(val)
+	}
+	return s
 }
 
 // Add 添加一个元素
@@ -122,22 +129,25 @@ func (s *AnySet) Filter(f func(val any) bool) Set {
 			s.count--
 		}
 	})
+	if s.count != len(s.data) {
+		s.count = len(s.data)
+	}
 	return s
 }
 
 // CloneFilter 根据条件删除对应元素，条件判定为false的时候删除该元素，返回的是一个新对象。
-func (s AnySet) CloneFilter(f func(val any) bool) Set {
-	if f == nil {
-		panic("没有定义过滤器方法")
-	}
-	s.RangeW(func(val any) {
-		ok := f(val)
-		if !ok {
-			delete(s.data, val)
-		}
-	})
-	return &s
-}
+//func (s AnySet) CloneFilter(f func(val any) bool) Set {
+//	if f == nil {
+//		panic("没有定义过滤器方法")
+//	}
+//	s.RangeW(func(val any) {
+//		ok := f(val)
+//		if !ok {
+//			delete(s.data, val)
+//		}
+//	})
+//	return &s
+//}
 
 // Find 通过关键特征查找一个对象并返回它的指针
 func (s *AnySet) Find(f func(val any) bool) (ret *interface{}) {
@@ -155,9 +165,35 @@ func (s *AnySet) Find(f func(val any) bool) (ret *interface{}) {
 	return
 }
 
-// Clone 获取该对象的拷贝,没有对set内部对象进行复制，还是引用的原本对象。
-func (s AnySet) Clone() Set {
-	return &s
+func (s *AnySet) IsEmpty() bool {
+	return s.count == 0
+}
+
+func (s *AnySet) Contains(val any) bool {
+	s.m.RLock()
+	defer s.m.RUnlock()
+	_, ok := s.data[val]
+	return ok
+}
+
+func (s *AnySet) RetainAll(anies []any) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *AnySet) RemoveAll(anies []any) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *AnySet) ContainsAll(anies []any) bool {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *AnySet) AddAll(anies []any) bool {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (s *AnySet) Size() int {

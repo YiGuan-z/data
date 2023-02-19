@@ -29,4 +29,6 @@ type Stream interface {
 	Skip(int) Stream
 	// Range 用于循环元素
 	Range(func(val any))
+	// Size 返回元素的个数
+	Size() int
 }

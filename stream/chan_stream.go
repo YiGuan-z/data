@@ -26,6 +26,7 @@ func newChanStreamOfChan(data <-chan any, size int) Stream {
 	}
 }
 
+// newChanel 根据切片创建一个管道并返回大小
 func newChanel(data []any) (send <-chan any, lenght int) {
 	ret := make(chan any)
 	go func() {
@@ -161,6 +162,10 @@ func (c *ChanStream) Skip(i int) Stream {
 
 func (c *ChanStream) Range(f func(val any)) {
 	c.DefaultRange(f)
+}
+
+func (c *ChanStream) Size() int {
+	return c.size
 }
 
 // RangeFunc f是循环内的操作函数，end代表循环结束后的收尾操作，offset代表偏移量，丢弃掉一些数据

@@ -109,6 +109,10 @@ func (a *ArrayStream) Range(f func(val any)) {
 	}
 }
 
+func (a *ArrayStream) Size() int {
+	return a.size
+}
+
 func NewArrayStream(data []any) *ArrayStream {
 	return &ArrayStream{data: data, size: len(data)}
 }

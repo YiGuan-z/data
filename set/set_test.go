@@ -56,8 +56,10 @@ func TestSet(t *testing.T) {
 		u2 := &User{"小明", 1}
 		u3 := &User{"小明", 1}
 		set.Adds(u1, u2, u3)
-		set1 := set.Clone()
-		t.Logf("set%p,set1%p", set, set1)
+		t.Logf("u1%p,u2%p,u3%p\n", u1, u2, u3)
+		set.Range(func(val any) {
+			t.Logf("%p\r", val)
+		})
 	})
 	t.Run("testClear", func(t *testing.T) {
 		set := NewSet(5)
