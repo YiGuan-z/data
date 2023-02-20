@@ -32,7 +32,7 @@ func (c *ChanStream) ToMap(f func(val any) (key any, value any)) map[any]any {
 }
 
 func (c *ChanStream) ToSet(f func(val any) any) set.Set {
-	ret := set.NewSet(c.size)
+	ret := set.NewUnsafeSetOfLen(c.size)
 	c.DefaultRange(func(val any) {
 		ret.Add(f(val))
 	})
@@ -140,7 +140,7 @@ func (c *ChanStream) Size() int {
 }
 
 func (c *ChanStream) Distinct() Stream {
-	store := set.NewSet(c.size)
+	store := set.NewUnsafeSetOfLen(c.size)
 	c.Range(func(val any) {
 		store.Add(val)
 	})
