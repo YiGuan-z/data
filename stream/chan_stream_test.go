@@ -14,12 +14,13 @@ func TestNewChanStream(t *testing.T) {
 	//stream.Head(2).Range(func(val any) {
 	//	fmt.Println(val)
 	//})
-	stream.NewChanStream(s).Filter(func(val any) bool {
+	stream.NewChanStream(s).Tail(6).Filter(func(val any) bool {
+		fmt.Println(val)
 		if i, ok := val.(int); ok {
 			return i%2 == 0
 		}
 		return false
 	}).Range(func(val any) {
-		fmt.Println(val)
+		//fmt.Println(val)
 	})
 }

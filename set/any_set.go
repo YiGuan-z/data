@@ -211,3 +211,12 @@ func (s *AnySet) AddAll(anies []any) bool {
 func (s *AnySet) Size() int {
 	return s.count
 }
+
+func (s *AnySet) ToSlice() []any {
+	ret := make([]any, s.Size())
+	s.RangeR(func(val any) {
+		ret = append(ret, val)
+	})
+	defer s.Clear()
+	return ret
+}

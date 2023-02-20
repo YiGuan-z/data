@@ -2,42 +2,14 @@ package stream
 
 import (
 	"github.com/YiGuan-z/data/set"
+	"sync/atomic"
 )
 
 type ChanStream struct {
-	p    <-chan any
-	size int
-}
-
-func NewChanStream(data []any) Stream {
-	send, lenght := newChanel(data)
-	return &ChanStream{
-		p:    send,
-		size: lenght,
-	}
-}
-
-// newChanStreamOfChan ChanStream 的构造，必须携带发送内容的长度，以便应对初始化切片、map的时候造成性能损失。
-// 并且Head Tail Skip 这三个方法需要使用它
-func newChanStreamOfChan(data <-chan any, size int) Stream {
-	return &ChanStream{
-		p:    data,
-		size: size,
-	}
-}
-
-// newChanel 根据切片创建一个管道并返回大小
-func newChanel(data []any) (send <-chan any, lenght int) {
-	ret := make(chan any)
-	go func() {
-		for _, v := range data {
-			ret <- v
-		}
-		close(ret)
-	}()
-	send = ret
-	lenght = len(data)
-	return
+	p            <-chan any
+	size         int
+	infinite     bool
+	stopGenerate *atomic.Bool
 }
 
 func (c *ChanStream) Find(f func(val any) bool) any {
@@ -76,13 +48,13 @@ func (c *ChanStream) ToArray() []any {
 }
 
 func (c *ChanStream) Count(f func(val any) bool) int {
-	count := new(int)
+	count := 0
 	c.DefaultRange(func(val any) {
 		if f(val) {
-			*count++
+			count++
 		}
 	})
-	return *count
+	return count
 }
 
 func (c *ChanStream) Chanel() <-chan any {
@@ -103,12 +75,15 @@ func (c *ChanStream) Filter(f func(val any) bool) Stream {
 			ch <- val
 		} else {
 			//被舍弃掉的元素
-			c.size--
+			//判断一下是否是无限流
+			if !c.infinite {
+				c.size--
+			}
 		}
 	}, func() {
 		close(ch)
 	}, 0)
-	return newChanStreamOfChan(ch, c.size)
+	return newChanStreamOfChan(ch, c.size, c.infinite)
 }
 
 func (c *ChanStream) Map(f func(val any) any) Stream {
@@ -132,22 +107,18 @@ func (c *ChanStream) Head(i int) Stream {
 	}, func() {
 		close(r)
 	}, 0)
-	return newChanStreamOfChan(r, i)
+	return newChanStreamOfChan(r, i, c.infinite)
 }
 
 func (c *ChanStream) Tail(i int) Stream {
-	count := 0
 	r := make(chan any)
 	size := c.size - i
 	go c.RangeFunc(func(val any) {
-		if count >= size {
-			r <- val
-		}
-		count++
+		r <- val
 	}, func() {
 		close(r)
-	}, 0)
-	return newChanStreamOfChan(r, i)
+	}, size)
+	return newChanStreamOfChan(r, i, c.infinite)
 }
 
 func (c *ChanStream) Skip(i int) Stream {
@@ -157,7 +128,7 @@ func (c *ChanStream) Skip(i int) Stream {
 	}, func() {
 		close(r)
 	}, i)
-	return newChanStreamOfChan(r, c.size-i)
+	return newChanStreamOfChan(r, c.size-i, c.infinite)
 }
 
 func (c *ChanStream) Range(f func(val any)) {
@@ -168,6 +139,34 @@ func (c *ChanStream) Size() int {
 	return c.size
 }
 
+func (c *ChanStream) Distinct() Stream {
+	store := set.NewSet(c.size)
+	c.Range(func(val any) {
+		store.Add(val)
+	})
+	return NewChanStream(store.ToSlice())
+}
+
+func (c *ChanStream) Limit(i int) Stream {
+	//如果是无限流就进行截断操作
+	//不是无限流就转到Skip方法
+	if c.infinite {
+		count := atomic.Int32{}
+		retCh := make(chan any)
+		go func() {
+			for count.Load() > int32(i) {
+				retCh <- c.p
+				count.Add(1)
+			}
+			c.stopGenerate.Store(false)
+			close(retCh)
+		}()
+		return newChanStreamOfChan(retCh, int(count.Load()), false)
+	} else {
+		return c.Skip(i)
+	}
+}
+
 // RangeFunc f是循环内的操作函数，end代表循环结束后的收尾操作，offset代表偏移量，丢弃掉一些数据
 func (c *ChanStream) RangeFunc(f func(val any), end func(), offset int) {
 	count := 0
@@ -175,7 +174,9 @@ func (c *ChanStream) RangeFunc(f func(val any), end func(), offset int) {
 		//如果计数器小于偏移量，则跳过
 		if count < offset {
 			//长度计算器计算被忽略的元素
-			c.size--
+			if !c.infinite {
+				c.size--
+			}
 			count++
 			continue
 		}

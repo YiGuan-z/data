@@ -115,6 +115,14 @@ func (a *ArrayStream) Size() int {
 	return a.size
 }
 
-func NewArrayStream(data []any) *ArrayStream {
-	return &ArrayStream{data: data, size: len(data)}
+func (a *ArrayStream) Distinct() Stream {
+	store := set.NewSet(a.size)
+	a.Range(func(val any) {
+		store.Add(val)
+	})
+	return NewChanStream(store.ToSlice())
+}
+
+func (a *ArrayStream) Limit(i int) Stream {
+	return a.Skip(i)
 }
