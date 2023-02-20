@@ -27,7 +27,7 @@ func (u *unsafeSet) Remove(a any) (any, bool) {
 }
 
 func (u *unsafeSet) Range(f func(any)) {
-	for k, _ := range u.data {
+	for k := range u.data {
 		f(k)
 	}
 }

@@ -157,7 +157,7 @@ func (s *safeSet) ToSlice() []any {
 	return ret
 }
 
-// rangeRW 传递一个用于方法，后两个参数决定是否加锁或者加什么类型的锁
+// rangeRW 传递一个方法，后两个参数决定是否加锁或者加什么类型的锁
 func (s *safeSet) rangeRW(f func(val any), r, w bool) {
 	if r && w {
 		panic("不能同时开启读写锁")
@@ -175,7 +175,7 @@ func (s *safeSet) rangeRW(f func(val any), r, w bool) {
 		panic("方法未定义")
 	}
 	if s.Size() > 0 {
-		for k, _ := range s.data {
+		for k := range s.data {
 			f(k)
 		}
 	}

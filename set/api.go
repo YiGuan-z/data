@@ -1,5 +1,7 @@
 package set
 
+/*-------------------------------------safe-------------------------------------*/
+
 // NewSafeSet 创建一个安全Set
 func NewSafeSet() Set {
 	return &safeSet{
@@ -18,6 +20,8 @@ func NewSafeSetOfSlice(a []any) Set {
 	ret.Adds(a...)
 	return ret
 }
+
+/*--------------------------------------unsafe--------------------------------------*/
 
 // NewUnsafeSet 创建一个不安全的Set
 func NewUnsafeSet() Set {

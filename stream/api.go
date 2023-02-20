@@ -16,7 +16,7 @@ func NewArrayStream(data []any) *ArrayStream {
 	return &ArrayStream{data: data, size: len(data)}
 }
 
-// newChanStreamOfChan ChanStream 的构造，必须携带发送内容的长度，以便应对初始化切片、map的时候造成性能损失。
+// newChanStreamOfChan ChanStream 的构造，必须携带发送内容的长度，以便应对使用切片、map的时候造成性能损失。
 // 并且Head Tail Skip 这三个方法需要使用它
 func newChanStreamOfChan(data <-chan any, size int, infinite bool) Stream {
 	return &ChanStream{
