@@ -10,10 +10,6 @@ type AnySet struct {
 	m     sync.RWMutex
 }
 
-//type Entry struct {
-//	p unsafe.Pointer
-//}
-
 func NewSet(size int) Set {
 	return &AnySet{
 		data: make(map[any]struct{}, size),
