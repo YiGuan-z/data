@@ -163,7 +163,7 @@ func (c *ChanStream) Limit(i int) Stream {
 		}()
 		return newChanStreamOfChan(retCh, int(count.Load()), false)
 	} else {
-		return c.Skip(i)
+		return c.Head(i)
 	}
 }
 

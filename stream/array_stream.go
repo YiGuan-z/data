@@ -124,5 +124,5 @@ func (a *ArrayStream) Distinct() Stream {
 }
 
 func (a *ArrayStream) Limit(i int) Stream {
-	return a.Skip(i)
+	return a.Head(i)
 }
