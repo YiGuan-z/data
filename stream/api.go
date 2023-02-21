@@ -28,20 +28,6 @@ func newChanStreamOfChan(data <-chan any, size int, infinite bool) Stream {
 	}
 }
 
-// newChanel 根据切片创建一个管道并返回大小
-func newChanel(data []any) (send <-chan any, lenght int) {
-	ret := make(chan any)
-	go func() {
-		for _, v := range data {
-			ret <- v
-		}
-		close(ret)
-	}()
-	send = ret
-	lenght = len(data)
-	return
-}
-
 // Generate 生成一个无限流
 func Generate(f func() any) Stream {
 	if f == nil {
@@ -89,10 +75,4 @@ func Iteration(seed any, hasNext func(any) bool, next func(any) any) Stream {
 		infinite: false,
 	}
 	return ret
-}
-
-func checkFunc(f any) {
-	if f == nil {
-		panic("方法未定义")
-	}
 }
