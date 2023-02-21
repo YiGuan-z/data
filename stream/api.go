@@ -5,14 +5,16 @@ import "sync/atomic"
 // NewChanStream 创建管道流
 func NewChanStream(data []any) Stream {
 	send, lenght := newChanel(data)
+	size := new(int)
+	*size = lenght
 	return &ChanStream{
 		p:    send,
-		size: lenght,
+		size: size,
 	}
 }
 
 // NewArrayStream 创建数组流
-func NewArrayStream(data []any) *ArrayStream {
+func NewArrayStream(data []any) Stream {
 	return &ArrayStream{data: data, size: len(data)}
 }
 
@@ -21,7 +23,7 @@ func NewArrayStream(data []any) *ArrayStream {
 func newChanStreamOfChan(data <-chan any, size int, infinite bool) Stream {
 	return &ChanStream{
 		p:        data,
-		size:     size,
+		size:     &size,
 		infinite: infinite,
 	}
 }
@@ -46,19 +48,51 @@ func Generate(f func() any) Stream {
 		panic("生成器方法未定义")
 	}
 	g := make(chan any)
+	count := new(int)
 	stop := atomic.Bool{}
 	stop.Store(true)
 	go func(c chan<- any) {
 		for stop.Load() {
 			c <- f()
+			*count++
 		}
 		close(g)
 	}(g)
 	ret := &ChanStream{
 		p:            g,
-		size:         0,
+		size:         count,
 		infinite:     true,
 		stopGenerate: &stop,
 	}
 	return ret
+}
+
+func Iteration(seed any, hasNext func(any) bool, next func(any) any) Stream {
+	checkFunc(hasNext)
+	checkFunc(next)
+	g := make(chan any)
+	count := new(int)
+	go func(c <-chan any) {
+		//判断是否需要迭代
+		for hasNext(seed) {
+			//将当前元素传给迭代方法进行迭代
+			seed = next(seed)
+			//交给管道
+			g <- seed
+			*count++
+		}
+		close(g)
+	}(g)
+	ret := &ChanStream{
+		p:        g,
+		size:     count,
+		infinite: false,
+	}
+	return ret
+}
+
+func checkFunc(f any) {
+	if f == nil {
+		panic("方法未定义")
+	}
 }

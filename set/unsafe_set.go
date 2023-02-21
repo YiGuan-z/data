@@ -47,20 +47,20 @@ func (u *unsafeSet) Filter(f func(any) bool) Set {
 	return u
 }
 
-func (u *unsafeSet) Find(f func(any) bool) (ret *interface{}) {
-	if f == nil {
-		panic("没有定义查找方法")
-	}
-	u.Range(func(val any) {
-		ok := f(val)
-		if ok {
-			ret = &val
-			return
-		}
-	})
-	ret = nil
-	return
-}
+//func (u *unsafeSet) Find(f func(any) bool) (ret *interface{}) {
+//	if f == nil {
+//		panic("没有定义查找方法")
+//	}
+//	u.Range(func(val any) {
+//		ok := f(val)
+//		if ok {
+//			ret = &val
+//			return
+//		}
+//	})
+//	ret = nil
+//	return
+//}
 
 func (u *unsafeSet) Clear() {
 	if u.Size() > 0 {

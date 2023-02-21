@@ -66,20 +66,19 @@ func (s *safeSet) Filter(f func(any) bool) Set {
 	return s
 }
 
-func (s *safeSet) Find(f func(any) bool) (ret *interface{}) {
-	if f == nil {
-		panic("没有定义查找方法")
-	}
-	s.RangeR(func(val any) {
-		ok := f(val)
-		if ok {
-			ret = &val
-			return
-		}
-	})
-	ret = nil
-	return
-}
+//func (s *safeSet) Find(f func(any) bool) (ret *interface{}) {
+//	if f == nil {
+//		panic("没有定义查找方法")
+//	}
+//	s.RangeR(func(val any) {
+//		ok := f(val)
+//		if ok {
+//			ret = &val
+//			return
+//		}
+//	})
+//	return
+//}
 
 func (s *safeSet) Clear() {
 	s.m.Lock()

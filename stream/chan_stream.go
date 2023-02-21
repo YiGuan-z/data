@@ -7,7 +7,7 @@ import (
 
 type ChanStream struct {
 	p            <-chan any
-	size         int
+	size         *int
 	infinite     bool
 	stopGenerate *atomic.Bool
 }
@@ -23,7 +23,7 @@ func (c *ChanStream) Find(f func(val any) bool) any {
 }
 
 func (c *ChanStream) ToMap(f func(val any) (key any, value any)) map[any]any {
-	retMap := make(map[any]any, c.size)
+	retMap := make(map[any]any, *c.size)
 	c.DefaultRange(func(val any) {
 		key, value := f(val)
 		retMap[key] = value
@@ -32,7 +32,7 @@ func (c *ChanStream) ToMap(f func(val any) (key any, value any)) map[any]any {
 }
 
 func (c *ChanStream) ToSet(f func(val any) any) set.Set {
-	ret := set.NewUnsafeSetOfLen(c.size)
+	ret := set.NewUnsafeSetOfLen(*c.size)
 	c.DefaultRange(func(val any) {
 		ret.Add(f(val))
 	})
@@ -40,7 +40,7 @@ func (c *ChanStream) ToSet(f func(val any) any) set.Set {
 }
 
 func (c *ChanStream) ToArray() []any {
-	arr := make([]any, c.size)
+	arr := make([]any, *c.size)
 	c.DefaultRange(func(val any) {
 		arr = append(arr, val)
 	})
@@ -77,17 +77,17 @@ func (c *ChanStream) Filter(f func(val any) bool) Stream {
 			//被舍弃掉的元素
 			//判断一下是否是无限流
 			if !c.infinite {
-				c.size--
+				*c.size--
 			}
 		}
 	}, func() {
 		close(ch)
 	}, 0)
-	return newChanStreamOfChan(ch, c.size, c.infinite)
+	return newChanStreamOfChan(ch, *c.size, c.infinite)
 }
 
 func (c *ChanStream) Map(f func(val any) any) Stream {
-	arr := make([]any, c.size)
+	arr := make([]any, *c.size)
 	c.DefaultRange(func(val any) {
 		obj := f(val)
 		arr = append(arr, obj)
@@ -112,7 +112,7 @@ func (c *ChanStream) Head(i int) Stream {
 
 func (c *ChanStream) Tail(i int) Stream {
 	r := make(chan any)
-	size := c.size - i
+	size := *c.size - i
 	go c.RangeFunc(func(val any) {
 		r <- val
 	}, func() {
@@ -128,7 +128,7 @@ func (c *ChanStream) Skip(i int) Stream {
 	}, func() {
 		close(r)
 	}, i)
-	return newChanStreamOfChan(r, c.size-i, c.infinite)
+	return newChanStreamOfChan(r, *c.size-i, c.infinite)
 }
 
 func (c *ChanStream) Range(f func(val any)) {
@@ -136,11 +136,11 @@ func (c *ChanStream) Range(f func(val any)) {
 }
 
 func (c *ChanStream) Size() int {
-	return c.size
+	return *c.size
 }
 
 func (c *ChanStream) Distinct() Stream {
-	store := set.NewUnsafeSetOfLen(c.size)
+	store := set.NewUnsafeSetOfLen(*c.size)
 	c.Range(func(val any) {
 		store.Add(val)
 	})
@@ -167,6 +167,19 @@ func (c *ChanStream) Limit(i int) Stream {
 	}
 }
 
+func (c *ChanStream) GroupBy(f func(any) bool) (yes, no []any) {
+	yes = make([]any, *c.size)
+	no = make([]any, *c.size)
+	c.Range(func(val any) {
+		if f(val) {
+			yes = append(yes, val)
+		} else {
+			no = append(no, val)
+		}
+	})
+	return
+}
+
 // RangeFunc f是循环内的操作函数，end代表循环结束后的收尾操作，offset代表偏移量，丢弃掉一些数据
 func (c *ChanStream) RangeFunc(f func(val any), end func(), offset int) {
 	count := 0
@@ -175,7 +188,7 @@ func (c *ChanStream) RangeFunc(f func(val any), end func(), offset int) {
 		if count < offset {
 			//长度计算器计算被忽略的元素
 			if !c.infinite {
-				c.size--
+				*c.size--
 			}
 			count++
 			continue

@@ -126,3 +126,16 @@ func (a *ArrayStream) Distinct() Stream {
 func (a *ArrayStream) Limit(i int) Stream {
 	return a.Head(i)
 }
+
+func (a *ArrayStream) GroupBy(f func(any) bool) (yes, no []any) {
+	yes = make([]any, a.size)
+	no = make([]any, a.size)
+	a.Range(func(val any) {
+		if f(val) {
+			yes = append(yes, val)
+		} else {
+			no = append(no, val)
+		}
+	})
+	return
+}
