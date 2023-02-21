@@ -11,8 +11,6 @@ type Set interface {
 	Range(func(any))
 	// Filter 根据条件删除对应元素 表达式判定为false将删除该元素
 	Filter(func(any) bool) Set
-	// Find 查找一个对象并返回它的指针
-	Find(func(any) bool) (ret *interface{})
 	// Clear 清空元素
 	Clear()
 	// Size 元素的个数

@@ -39,7 +39,7 @@ func (a *ArrayStream) ToMap(f func(val any) (key any, value any)) map[any]any {
 }
 
 func (a *ArrayStream) ToSet(f func(val any) any) set.Set {
-	ret := set.NewSet(a.size)
+	ret := set.NewUnsafeSetOfLen(a.size)
 	a.Range(func(val any) {
 		entry := f(val)
 		ret.Add(entry)
@@ -116,7 +116,7 @@ func (a *ArrayStream) Size() int {
 }
 
 func (a *ArrayStream) Distinct() Stream {
-	store := set.NewSet(a.size)
+	store := set.NewUnsafeSetOfLen(a.size)
 	a.Range(func(val any) {
 		store.Add(val)
 	})
@@ -125,4 +125,17 @@ func (a *ArrayStream) Distinct() Stream {
 
 func (a *ArrayStream) Limit(i int) Stream {
 	return a.Head(i)
+}
+
+func (a *ArrayStream) GroupBy(f func(any) bool) (yes, no []any) {
+	yes = make([]any, a.size)
+	no = make([]any, a.size)
+	a.Range(func(val any) {
+		if f(val) {
+			yes = append(yes, val)
+		} else {
+			no = append(no, val)
+		}
+	})
+	return
 }

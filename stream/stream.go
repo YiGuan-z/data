@@ -13,6 +13,8 @@ type Stream interface {
 	ToSet(func(val any) any) set.Set
 	// ToArray 将内容转化为数组
 	ToArray() []any
+	// GroupBy 分类函数 第一个切片为条件判定为true，第二个切片为条件判定为false
+	GroupBy(func(any) bool) (yes, no []any)
 	// Count 统计有多少元素符合方法约定
 	Count(func(val any) bool) int
 	// Chanel 转化为管道进行操作
