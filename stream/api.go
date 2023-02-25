@@ -1,6 +1,8 @@
 package stream
 
-import "sync/atomic"
+import (
+	"sync/atomic"
+)
 
 // NewChanStream 创建管道流
 func NewChanStream(data []any) Stream {
