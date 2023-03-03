@@ -6,14 +6,18 @@ import (
 )
 
 type ChanStream struct {
-	p            <-chan any
-	size         *int
-	infinite     bool
+	//p 是一个仅接收的元素通道
+	p <-chan any
+	//这个指针int主要用来对元素的长度进行统计，在生成器和迭代器中，起到了统计元素个数的作用。
+	size *int
+	//是否为无限流
+	infinite bool
+	//无限流的停止方法
 	stopGenerate *atomic.Bool
 }
 
-func (c *ChanStream) Find(f func(val any) bool) any {
-	var ret any
+// Find 是一个流的终止操作，因为是通过管道实现的操作，所以智能对每一个进行判断，同时还得让管道里的数据全部流完。
+func (c *ChanStream) Find(f func(val any) bool) (ret any) {
 	c.DefaultRange(func(val any) {
 		if f(val) {
 			ret = val

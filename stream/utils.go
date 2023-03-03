@@ -20,7 +20,7 @@ func checkSlice(a ...any) bool {
 func newChanel(data []any) (send <-chan any, lenght int) {
 	lenght = len(data)
 	if lenght == 0 {
-		panic("创建流对象的切片不能为空切片")
+		panic("slice is empty")
 	}
 	ret := make(chan any)
 	go func() {
